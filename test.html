@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <!-- <script src="/index.js"></script> -->
+  <link rel="shortcut icon" href="favicon.ico" />
+  <link rel="stylesheet" type="text/css" href="index.css">
+</head>
+
+<body>
+  <div class="header">
+  <h3>To do List</h3>
+  <input id="todoV" type="text" placeholder="請輸入待辦事項">
+  <button onclick="insert()">Send</button> 
+<!-- <table id="myData"></table> -->
+  <div id="myData" style="position: relative;top: 20%;">
+
+  </div>
+</div>
+<div class="pagination">
+  <!-- <a href="#">&laquo;</a> -->
+  <a href="http://127.0.0.1:8080">1</a>
+  <a href="http://127.0.0.1:8080/Page2.html">2</a>
+  <a href="http://127.0.0.1:8080/Page3.html">3</a>
+  <!-- <a href="#">&raquo;</a> -->
+</div>
+
+<script>
+  //checked
+var list = document.querySelector('ul');
+list.addEventListener('click', function(e) {
+  if (e.target.tagName === 'LI') {
+    e.target.classList.toggle('checked');
+  }
+}, false);
+
+
+  const uri = 'http://127.0.0.1:8080/getpage?page=1';
+  const initDetails = {
+      method: 'GET',
+      headers: {
+          "Content-Type": "application/json; charset=utf-8"
+      },
+      mode: "cors"
+  }
+      fetch( uri, initDetails )
+          .then(function (response) {
+            return response.json();
+          })
+          .then(function (data) {
+          appendData(data);
+         })
+          .catch( err =>
+          {
+              console.log( 'Fetch Error :-S', err );
+          } );
+  function appendData(data) {
+  var mainContainer = document.getElementById("myData");
+  for (var i = 0; i < data.length; i++) {
+    var ul = document.createElement("ul");
+    ul.innerHTML = `<li name="finish" class="" id="${data[i].id}" onclick="finish(this)" value="${data[i].status}>
+    ${data[i].title}
+    <button id="change" onclick="change(this)" value="${data[i].id}">修改</button>
+    <button id="del" onclick="del(this)" value="${data[i].id}">刪除</button> </li>`;
+    mainContainer.appendChild(ul);
+  }
+}
+// ------------------------------------
+function insert(){
+var chV = document.getElementById('todoV').value
+if (chV === "") {
+window.alert("請勿輸入空值")
+}else{
+  const uri = 'http://127.0.0.1:8080/insert';
+  const initDetails = {
+      method: 'POST',
+      headers: {
+          "Content-Type": "application/json; charset=utf-8"
+      },
+      body: JSON.stringify({"title":chV}),
+      mode: "cors"
+  }
+      fetch( uri, initDetails )
+          .then(function (response) {
+            return response.json();
+          })
+          .then(function (data) {
+          // window.alert(JSON.stringify(data.title)+' 新增成功',
+          location.reload()
+         })
+          .catch( err =>
+          {
+              console.log( 'Fetch Error :-S', err );
+          } );
+}
+}
+
+function change(e){
+  var chV = prompt('請輸入修改值');
+  var chId = e.value
+  var cid = parseInt(chId,10)
+  const uri = `http://127.0.0.1:8080/put/${chId}`;
+  const initDetails = {
+      method: 'PUT',
+      headers: {
+          "Content-Type": "application/json; charset=utf-8"
+      },
+      body: JSON.stringify({"id":cid,"title":chV}),
+      mode: "cors"
+  }
+      fetch( uri, initDetails )
+          .then(function (response) {
+            return response.json();
+          })
+          .then(function (data) {
+          appendData(data);
+          window.alert(JSON.stringify(data.title)+'修改成功')
+          window.location.reload()
+         })
+          .catch( err =>
+          {
+              console.log( 'Fetch Error :-S', err );
+          } );
+}
+
+function del(e){
+  var chId = e.value
+  var cid = parseInt(chId,10)
+  const uri = `http://127.0.0.1:8080/del/${chId}`;
+  const initDetails = {
+      method: 'DELETE',
+      headers: {
+          "Content-Type": "application/json; charset=utf-8"
+      },
+      body: JSON.stringify({"id":cid}),
+      mode: "cors"
+  }
+      fetch( uri, initDetails )
+          .then(function (response) {
+            return response.json();
+          })
+          .then(function (data) {
+          appendData(data);
+          // window.alert(JSON.stringify(data))
+          location.reload()
+          
+         })
+          .catch( err =>
+          {
+              console.log( 'Fetch Error :-S', err );
+          } );
+}
+
+
+function finish(e){
+  if (e.value =="false"){
+   var a = document.getElementsByName('finish').value = true
+  }else{
+   var a = document.getElementsByName('finish').value = false
+  }
+  
+  var chId = e.id
+  var cid = parseInt(chId,10)
+  const uri = `http://127.0.0.1:8080/put/${chId}`;
+  const initDetails = {
+      method: 'PUT',
+      headers: {
+          "Content-Type": "application/json; charset=utf-8"
+      },
+      body: JSON.stringify({"id":cid,"status":a}),
+      mode: "cors"
+  }
+      fetch( uri, initDetails )
+          .then(function (response) {
+            return response.json();
+          })
+          .then(function (data) {
+          appendData(data);
+         })
+          .catch( err =>
+          {
+              console.log( 'Fetch Error :-S', err );
+          } );
+}
+
+</script>
+ 
+</body>
+</html>
